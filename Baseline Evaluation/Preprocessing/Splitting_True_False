@@ -1,0 +1,44 @@
+import pandas as pd
+
+# Load the dataset (replace with your actual file path)
+df = pd.read_csv('/content/drive/MyDrive/one-to-many/filter_cpp.csv')
+
+# Step 1: Split the dataset into two parts
+# Get all unique Pull_Labels
+unique_pull_labels = df['Pull_Label'].unique()
+
+
+midpoint = len(unique_pull_labels) // 2
+
+
+part1_labels = unique_pull_labels[:midpoint]
+part2_labels = unique_pull_labels[midpoint:]
+
+
+part1_df = df[df['Pull_Label'].isin(part1_labels)]
+part2_df = df[df['Pull_Label'].isin(part2_labels)]
+
+# Step 2: Assign 'actual_index' and 'label' columns
+
+part1_df['actual_index'] = pd.factorize(part1_df['Pull_Label'])[0] + 1
+part1_df['label'] = 1  # True links
+
+
+last_true_index = part1_df['actual_index'].max()
+false_start_index = last_true_index + 100
+
+
+part2_df['actual_index'] = pd.factorize(part2_df['Pull_Label'])[0] + false_start_index
+part2_df['label'] = 0  # False links
+
+# Save the true and false datasets as separate files
+part1_df.to_csv('Path', index=False)
+part2_df.to_csv('Path', index=False)
+
+print("True Links Dataset:")
+print(part1_df.head())
+print(f"Shape of True Links Dataset: {part1_df.shape}")
+
+print("\nFalse Links Dataset:")
+print(part2_df.head())
+print(f"Shape of False Links Dataset: {part2_df.shape}")
